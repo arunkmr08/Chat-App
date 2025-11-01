@@ -1,6 +1,7 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import { config } from 'dotenv'
+import { pool, query } from './lib/db.js'
 
 // Load environment variables
 config()
@@ -28,7 +29,20 @@ await server.register(cors, {
 
 // Health check endpoint
 server.get('/healthz', async (_request, reply) => {
-  return reply.send({ ok: true, timestamp: new Date().toISOString() })
+  let dbStatus = 'unknown'
+
+  try {
+    const result = await query('SELECT NOW() as time')
+    dbStatus = result.rows.length > 0 ? 'connected' : 'disconnected'
+  } catch (error) {
+    dbStatus = 'error'
+  }
+
+  return reply.send({
+    ok: true,
+    timestamp: new Date().toISOString(),
+    database: dbStatus
+  })
 })
 
 // Root endpoint
@@ -40,9 +54,29 @@ server.get('/', async (_request, reply) => {
   })
 })
 
+// Graceful shutdown
+const shutdown = async () => {
+  console.log('Shutting down gracefully...')
+  await pool.end()
+  await server.close()
+  process.exit(0)
+}
+
+process.on('SIGINT', shutdown)
+process.on('SIGTERM', shutdown)
+
 // Start server
 const start = async () => {
   try {
+    // Test database connection
+    try {
+      const result = await query('SELECT NOW() as time')
+      console.log('✅ Database connected:', result.rows[0].time)
+    } catch (error) {
+      console.warn('⚠️  Database not available:', (error as Error).message)
+      console.warn('   You need to start Postgres - see README.md')
+    }
+
     await server.listen({ port: PORT, host: HOST })
     console.log(`🚀 Server running at http://${HOST}:${PORT}`)
   } catch (err) {
