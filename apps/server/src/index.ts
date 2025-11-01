@@ -2,6 +2,8 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import { config } from 'dotenv'
 import { pool, query } from './lib/db.js'
+import { closeQueues } from './lib/queue.js'
+import chatRoutes from './routes/chats.js'
 
 // Load environment variables
 config()
@@ -26,6 +28,9 @@ await server.register(cors, {
   origin: true,
   credentials: true
 })
+
+// Register routes
+await server.register(chatRoutes, { prefix: '/api' })
 
 // Health check endpoint
 server.get('/healthz', async (_request, reply) => {
@@ -57,6 +62,7 @@ server.get('/', async (_request, reply) => {
 // Graceful shutdown
 const shutdown = async () => {
   console.log('Shutting down gracefully...')
+  await closeQueues()
   await pool.end()
   await server.close()
   process.exit(0)
@@ -75,6 +81,16 @@ const start = async () => {
     } catch (error) {
       console.warn('⚠️  Database not available:', (error as Error).message)
       console.warn('   You need to start Postgres - see README.md')
+    }
+
+    // Start workers (import here to avoid running them during migration)
+    try {
+      await import('./workers/ingest-worker.js')
+      await import('./workers/embed-worker.js')
+      console.log('✅ Workers started')
+    } catch (error) {
+      console.warn('⚠️  Redis not available, workers not started')
+      console.warn('   Background jobs will not process without Redis')
     }
 
     await server.listen({ port: PORT, host: HOST })
