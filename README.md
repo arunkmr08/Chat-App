@@ -84,12 +84,44 @@ This application allows users to:
 - `GET /api/chats/:id/sources` - Get source processing status
 - `GET /api/agents` - List available AI agents
 
-### 🚧 Next: Stages 5-7 - RAG + Multi-Agent System
+### ✅ Stage 5 Complete: RAG Context Builder
+- **Embedding Generation**: Convert questions to vectors for similarity search
+- **Vector Search**: Find top-K similar chunks using pgvector (<-> operator)
+- **Context Building**: Format retrieved chunks with metadata and citations
+- **Relevance Checking**: Validate context quality before sending to agents
+- **Citation Tracking**: Document-level and chunk-level references
+
+### ✅ Stage 6 Complete: AI Agent Adapters
+- **Base Interface**: Unified `AgentAdapter` with retry logic and error handling
+- **OpenAI**: GPT-4o and GPT-4o-mini integration
+- **Anthropic**: Claude 3.5 Sonnet integration
+- **Google**: Gemini Pro and Gemini Flash integration
+- **Agent Registry**: Dynamic agent loading by database ID
+- **Token Tracking**: Usage monitoring for all agents
+
+### ✅ Stage 7 Complete: Multi-Agent Orchestrator
+- **Parallel Execution**: Run 3+ agents simultaneously
+- **RAG Integration**: Build context from vector search
+- **Synthesis**: Combine all responses into best answer using GPT-4o
+- **Error Resilience**: Individual agent failures don't break system
+- **Citation Preservation**: Maintain all source references
+- **Metrics**: Latency and token tracking per agent
+
+**Complete API Endpoints:**
+- `POST /api/chats/:id/messages` - Ask question, get multi-agent answer
+- `GET /api/chats/:id/messages` - List chat history
+- `GET /api/messages/:id` - Get message with all agent responses
+
+**See [API_GUIDE.md](./API_GUIDE.md) for complete documentation.**
+
+### 🚧 Next: Stage 9 - PWA UI
 
 **What's next:**
-- Stage 5: RAG context builder for similarity search
-- Stage 6: AI agent adapters (OpenAI, Anthropic, Google)
-- Stage 7: Multi-agent orchestrator with synthesis
+- Build ChatGPT-like UI (React + Tailwind)
+- Chat list and conversation view
+- Source management interface
+- Real-time status updates
+- Offline-first with IndexedDB
 
 ## Getting Started
 
