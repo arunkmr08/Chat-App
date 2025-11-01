@@ -4,6 +4,7 @@ import { config } from 'dotenv'
 import { pool, query } from './lib/db.js'
 import { closeQueues } from './lib/queue.js'
 import chatRoutes from './routes/chats.js'
+import messageRoutes from './routes/messages.js'
 
 // Load environment variables
 config()
@@ -31,6 +32,7 @@ await server.register(cors, {
 
 // Register routes
 await server.register(chatRoutes, { prefix: '/api' })
+await server.register(messageRoutes, { prefix: '/api' })
 
 // Health check endpoint
 server.get('/healthz', async (_request, reply) => {
