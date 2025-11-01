@@ -52,27 +52,44 @@ This application allows users to:
 
 ## Current Status
 
-### ✓ Stage 1 Complete: Monorepo & Scaffolding
+### ✅ Stage 1 Complete: Monorepo & Scaffolding
+- Monorepo setup with pnpm + Turbo
+- Web app (React + Vite + TypeScript + Tailwind + PWA)
+- Server app (Fastify + TypeScript)
+- Shared types package
+- Docker Compose configuration
 
-**What's working:**
-- ✓ Monorepo setup with pnpm + Turbo
-- ✓ Web app scaffolded with PWA support
-- ✓ Server app with healthcheck endpoint
-- ✓ Shared types package
-- ✓ Docker Compose for local services
-- ✓ `/healthz` endpoint returns `{ok: true}`
-- ✓ Web app displays "Hello ZoAI Multi-Agent PWA"
+### ✅ Stage 2 Complete: Database Schema with pgvector
+- Complete SQL schema with 13 tables
+- pgvector extension enabled for embeddings (VECTOR(1536))
+- Migration system with tracking
+- IVFFlat index for fast similarity search
+- Default AI agents seeded (GPT-4o, Claude 3.5 Sonnet, Gemini)
+- Database client with connection pooling
+- Similarity search helper function
 
-**Endpoints:**
-- `GET /healthz` - Health check
-- `GET /` - API info
+### ✅ Stage 4 Complete: URL Ingestion Pipeline
+- **Embeddings Service**: OpenAI text-embedding-3-small integration
+- **Text Chunking**: Sentence-based chunking with 800-token chunks, 100-token overlap
+- **URL Fetcher**: Mozilla Readability for content extraction
+- **Job Queue**: BullMQ + Redis with exponential backoff
+- **Workers**: Ingest worker (fetch → chunk → save) & Embed worker (generate embeddings)
+- **Full Pipeline**: URL → Content → Chunks → Embeddings → Vector Storage
 
-### Next: Stage 2 - Database Schema
+**API Endpoints:**
+- `GET /healthz` - Health check with database status
+- `POST /api/chats` - Create chat with agents
+- `GET /api/chats` - List all chats
+- `POST /api/chats/:id/sources` - Add URLs to chat
+- `GET /api/chats/:id/sources` - Get source processing status
+- `GET /api/agents` - List available AI agents
+
+### 🚧 Next: Stages 5-7 - RAG + Multi-Agent System
 
 **What's next:**
-- Create Postgres tables with pgvector extension
-- Set up database migrations
-- Design schema for users, chats, messages, documents, chunks, agents
+- Stage 5: RAG context builder for similarity search
+- Stage 6: AI agent adapters (OpenAI, Anthropic, Google)
+- Stage 7: Multi-agent orchestrator with synthesis
 
 ## Getting Started
 
