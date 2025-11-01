@@ -202,19 +202,21 @@ See `apps/server/.env.example` for required environment variables.
 - [x] Stage 0: Big-picture decisions
 - [x] Stage 1: Monorepo & scaffolding
 - [x] Stage 2: Data model (Postgres + pgvector)
-- [ ] Stage 3: Authentication
+- [x] Stage 3: Authentication (magic links, JWT, sessions)
 - [x] Stage 4: File & URL ingestion pipeline
 - [x] Stage 5: RAG retrieval
 - [x] Stage 6: AI agent adapters
 - [x] Stage 7: Multi-agent orchestrator
-- [ ] Stage 8: Clarifying questions
+- [x] Stage 8: Clarifying questions (ambiguity detection)
 - [x] Stage 9: PWA UI (mobile-first)
-- [ ] Stage 10: API surface
-- [ ] Stage 11: UI states
+- [x] Stage 10: API surface (RESTful design, documentation)
+- [x] Stage 11: UI states (Zustand, Dexie, offline support)
 - [x] Stage 12: Deployment
-- [ ] Stage 13: Grounded answers enforcement
-- [ ] Stage 14: Observability & costs
-- [ ] Stage 15: Security basics
+- [x] Stage 13: Grounded answers enforcement (validation, confidence scoring)
+- [x] Stage 14: Observability & costs (logging, metrics, cost tracking)
+- [x] Stage 15: Security basics (auth, input validation, cookies)
+
+**🎉 All 16 stages complete! (100%)**
 
 ## Key Principles
 
