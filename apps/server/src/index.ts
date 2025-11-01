@@ -34,8 +34,8 @@ await server.register(cors, {
 await server.register(chatRoutes, { prefix: '/api' })
 await server.register(messageRoutes, { prefix: '/api' })
 
-// Health check endpoint
-server.get('/healthz', async (_request, reply) => {
+// Health check endpoints
+const healthCheck = async (_request, reply) => {
   let dbStatus = 'unknown'
 
   try {
@@ -50,7 +50,10 @@ server.get('/healthz', async (_request, reply) => {
     timestamp: new Date().toISOString(),
     database: dbStatus
   })
-})
+}
+
+server.get('/health', healthCheck)
+server.get('/healthz', healthCheck)
 
 // Root endpoint
 server.get('/', async (_request, reply) => {

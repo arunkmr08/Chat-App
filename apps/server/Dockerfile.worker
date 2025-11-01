@@ -1,0 +1,53 @@
+# Multi-stage build for production workers
+
+# Stage 1: Build
+FROM node:20-alpine AS builder
+
+# Install pnpm
+RUN npm install -g pnpm@10
+
+WORKDIR /app
+
+# Copy workspace files
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY turbo.json ./
+
+# Copy all apps and packages
+COPY apps/server ./apps/server
+COPY packages ./packages
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Build server
+RUN pnpm --filter @zoai/server build
+
+# Stage 2: Production
+FROM node:20-alpine
+
+# Install pnpm
+RUN npm install -g pnpm@10
+
+WORKDIR /app
+
+# Copy workspace files
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY turbo.json ./
+
+# Copy server package.json
+COPY apps/server/package.json ./apps/server/
+
+# Install production dependencies only
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy built server from builder
+COPY --from=builder /app/apps/server/dist ./apps/server/dist
+
+WORKDIR /app/apps/server
+
+# Accept worker type as build arg
+ARG WORKER_TYPE=ingest
+ENV WORKER_TYPE=${WORKER_TYPE}
+
+# Start worker based on WORKER_TYPE env var
+CMD ["sh", "-c", "node dist/workers/${WORKER_TYPE}-worker.js"]

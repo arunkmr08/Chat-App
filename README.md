@@ -114,14 +114,27 @@ This application allows users to:
 
 **See [API_GUIDE.md](./API_GUIDE.md) for complete documentation.**
 
-### 🚧 Next: Stage 9 - PWA UI
+### ✅ Stage 9 Complete: PWA UI
+- **ChatGPT-like Interface**: Clean, modern UI with sidebar navigation
+- **Chat Management**: Create chats with multi-select agent picker (1-5 agents)
+- **Message View**: Real-time chat with citations and similarity scores
+- **Source Manager**: URL ingestion with auto-refresh status tracking
+- **Status Indicators**: Color-coded badges (queued, parsing, embedding, ready, error)
+- **React Query Integration**: Server state management with auto-refresh
+- **Responsive Design**: Mobile-friendly layout with collapsible sidebar
+- **PWA Ready**: Service worker and manifest for offline support
 
-**What's next:**
-- Build ChatGPT-like UI (React + Tailwind)
-- Chat list and conversation view
-- Source management interface
-- Real-time status updates
-- Offline-first with IndexedDB
+### ✅ Stage 12 Complete: Production Deployment
+- **Docker Compose**: Production-ready multi-container setup
+- **Nginx Reverse Proxy**: Load balancing and SSL termination
+- **Multi-stage Dockerfiles**: Optimized builds for API and workers
+- **Health Checks**: Automated monitoring for all services
+- **SSL/HTTPS Support**: Let's Encrypt integration guide
+- **Deployment Script**: Automated deployment with validation
+- **Environment Templates**: Production configuration examples
+- **Complete Documentation**: Step-by-step deployment guide
+
+**See [DEPLOYMENT.md](./DEPLOYMENT.md) for production deployment instructions.**
 
 ## Getting Started
 
@@ -188,17 +201,17 @@ See `apps/server/.env.example` for required environment variables.
 
 - [x] Stage 0: Big-picture decisions
 - [x] Stage 1: Monorepo & scaffolding
-- [ ] Stage 2: Data model (Postgres + pgvector)
+- [x] Stage 2: Data model (Postgres + pgvector)
 - [ ] Stage 3: Authentication
-- [ ] Stage 4: File & URL ingestion pipeline
-- [ ] Stage 5: RAG retrieval
-- [ ] Stage 6: AI agent adapters
-- [ ] Stage 7: Multi-agent orchestrator
+- [x] Stage 4: File & URL ingestion pipeline
+- [x] Stage 5: RAG retrieval
+- [x] Stage 6: AI agent adapters
+- [x] Stage 7: Multi-agent orchestrator
 - [ ] Stage 8: Clarifying questions
-- [ ] Stage 9: PWA UI (mobile-first)
+- [x] Stage 9: PWA UI (mobile-first)
 - [ ] Stage 10: API surface
 - [ ] Stage 11: UI states
-- [ ] Stage 12: Deployment
+- [x] Stage 12: Deployment
 - [ ] Stage 13: Grounded answers enforcement
 - [ ] Stage 14: Observability & costs
 - [ ] Stage 15: Security basics
