@@ -1,9 +1,11 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
+import cookie from '@fastify/cookie'
 import multipart from '@fastify/multipart'
 import { config } from 'dotenv'
 import { pool, query } from './lib/db.js'
 import { closeQueues } from './lib/queue.js'
+import authRoutes from './routes/auth.js'
 import chatRoutes from './routes/chats.js'
 import messageRoutes from './routes/messages.js'
 import streamRoutes from './routes/stream.js'
@@ -33,6 +35,16 @@ await server.register(cors, {
   credentials: true
 })
 
+// Register cookie support
+await server.register(cookie, {
+  secret: process.env.COOKIE_SECRET || 'change-this-to-a-random-secret',
+  parseOptions: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  },
+})
+
 // Register multipart for file uploads
 await server.register(multipart, {
   limits: {
@@ -41,6 +53,7 @@ await server.register(multipart, {
 })
 
 // Register routes
+await server.register(authRoutes, { prefix: '/api' })
 await server.register(chatRoutes, { prefix: '/api' })
 await server.register(messageRoutes, { prefix: '/api' })
 await server.register(streamRoutes, { prefix: '/api' })
