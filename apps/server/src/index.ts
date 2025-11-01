@@ -1,10 +1,13 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
+import multipart from '@fastify/multipart'
 import { config } from 'dotenv'
 import { pool, query } from './lib/db.js'
 import { closeQueues } from './lib/queue.js'
 import chatRoutes from './routes/chats.js'
 import messageRoutes from './routes/messages.js'
+import streamRoutes from './routes/stream.js'
+import fileRoutes from './routes/files.js'
 
 // Load environment variables
 config()
@@ -30,9 +33,18 @@ await server.register(cors, {
   credentials: true
 })
 
+// Register multipart for file uploads
+await server.register(multipart, {
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max file size
+  },
+})
+
 // Register routes
 await server.register(chatRoutes, { prefix: '/api' })
 await server.register(messageRoutes, { prefix: '/api' })
+await server.register(streamRoutes, { prefix: '/api' })
+await server.register(fileRoutes, { prefix: '/api' })
 
 // Health check endpoints
 const healthCheck = async (_request, reply) => {

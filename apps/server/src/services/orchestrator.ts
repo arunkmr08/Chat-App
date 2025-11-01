@@ -1,6 +1,7 @@
 import { AgentAdapter, AgentResponse, Message } from '../agents/index.js'
 import { buildRAGContext, formatContextForPrompt, hasRelevantContext } from './rag.js'
 import { gpt4oAgent } from '../agents/openai.js'
+import { isWebSearchEnabled, searchWeb, formatSearchResultsForPrompt, extractWebCitations } from './web-search.js'
 
 export interface AgentResult {
   agentId: string
@@ -46,9 +47,60 @@ export class MultiAgentOrchestrator {
     if (!hasRelevantContext(ragContext, 0.3)) {
       console.log('[Orchestrator] No relevant context found')
 
+      // Try web search fallback if enabled
+      if (isWebSearchEnabled()) {
+        console.log('[Orchestrator] Falling back to web search')
+
+        try {
+          const searchResponse = await searchWeb(question, 5)
+          const contextText = formatSearchResultsForPrompt(searchResponse)
+
+          const systemPrompt = `You are a helpful AI assistant. Answer the user's question based on the web search results provided.
+
+IMPORTANT RULES:
+1. Use information from the search results
+2. Include citations by referring to [Source 1], [Source 2], etc.
+3. Be concise and accurate
+4. If the search results don't contain the answer, say so
+
+${contextText}`
+
+          const messages: Message[] = [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: question },
+          ]
+
+          // Use just one agent (GPT-4o) for web search answers
+          try {
+            const response = await gpt4oAgent.generate(messages, {
+              temperature: 0.7,
+              maxTokens: 1500,
+            })
+
+            return {
+              agentResults: [{
+                agentId: gpt4oAgent.id,
+                agentLabel: gpt4oAgent.label,
+                success: true,
+                response,
+              }],
+              synthesizedAnswer: response.text,
+              citations: extractWebCitations(searchResponse),
+              totalTokens: response.tokens.total,
+              totalLatencyMs: Date.now() - startTime,
+            }
+          } catch (error) {
+            console.error('[Orchestrator] Web search agent failed:', error)
+          }
+        } catch (error) {
+          console.error('[Orchestrator] Web search failed:', error)
+        }
+      }
+
       return {
         agentResults: [],
-        synthesizedAnswer: "I don't have enough information in the knowledge base to answer that question. However, I can search the web for this information. Would you like me to do that?",
+        synthesizedAnswer: "I don't have enough information in the knowledge base to answer that question." +
+          (isWebSearchEnabled() ? "" : " Web search is not configured."),
         citations: [],
         totalTokens: 0,
         totalLatencyMs: Date.now() - startTime,

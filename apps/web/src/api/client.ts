@@ -113,12 +113,92 @@ class ApiClient {
     return this.fetch(`/chats/${chatId}/sources`)
   }
 
+  // File upload
+  async uploadFile(
+    chatId: number,
+    file: File
+  ): Promise<{ source_id: number; document_id: number; file_name: string; chunks: number }> {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await fetch(`${this.baseUrl}/chats/${chatId}/files`, {
+      method: 'POST',
+      body: formData,
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: response.statusText }))
+      throw new Error(error.error || `HTTP ${response.status}`)
+    }
+
+    return response.json()
+  }
+
+  // Get supported file types
+  async getSupportedFileTypes(): Promise<{ extensions: string[]; max_size_mb: number }> {
+    return this.fetch('/files/supported-types')
+  }
+
   // Messages
   async sendMessage(chatId: number, text: string): Promise<SendMessageResponse> {
     return this.fetch(`/chats/${chatId}/messages`, {
       method: 'POST',
       body: JSON.stringify({ text }),
     })
+  }
+
+  // Streaming messages with Server-Sent Events
+  async sendMessageStream(
+    chatId: number,
+    text: string,
+    onEvent: (event: string, data: any) => void
+  ): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/chats/${chatId}/messages/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    const reader = response.body?.getReader()
+    const decoder = new TextDecoder()
+
+    if (!reader) {
+      throw new Error('No response body')
+    }
+
+    let buffer = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+
+      if (done) break
+
+      buffer += decoder.decode(value, { stream: true })
+
+      // Process complete SSE messages
+      const lines = buffer.split('\n\n')
+      buffer = lines.pop() || '' // Keep incomplete message in buffer
+
+      for (const line of lines) {
+        if (!line.trim()) continue
+
+        // Parse SSE format: "event: type\ndata: {...}"
+        const eventMatch = line.match(/^event:\s*(.+)$/m)
+        const dataMatch = line.match(/^data:\s*(.+)$/m)
+
+        if (eventMatch && dataMatch) {
+          const event = eventMatch[1]
+          const data = JSON.parse(dataMatch[1])
+          onEvent(event, data)
+        }
+      }
+    }
   }
 
   async getMessages(chatId: number): Promise<{ messages: Message[] }> {
